@@ -10,11 +10,17 @@ type Msg =
    author: principal;
    content: text;
    id: text;
+   likes: nat;
+   replies: vec text;
+   shares: nat;
    timestamp: Time;
  };
 service : {
   createMsg: (text) -> (Result);
   getTimeline: () -> (vec Msg) query;
   getUserProfile: (principal) -> (opt UserProfile) query;
+  likeMsg: (text) -> (Result);
+  replyToMsg: (text, text) -> (Result);
+  shareMsg: (text) -> (Result);
   updateUserProfile: (text) -> ();
 }

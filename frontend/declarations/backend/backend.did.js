@@ -3,8 +3,11 @@ export const idlFactory = ({ IDL }) => {
   const Msg = IDL.Record({
     'id' : IDL.Text,
     'content' : IDL.Text,
+    'shares' : IDL.Nat,
     'author' : IDL.Principal,
+    'likes' : IDL.Nat,
     'timestamp' : Time,
+    'replies' : IDL.Vec(IDL.Text),
   });
   const Result = IDL.Variant({ 'ok' : Msg, 'err' : IDL.Text });
   const UserProfile = IDL.Record({ 'username' : IDL.Text });
@@ -16,6 +19,9 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Opt(UserProfile)],
         ['query'],
       ),
+    'likeMsg' : IDL.Func([IDL.Text], [Result], []),
+    'replyToMsg' : IDL.Func([IDL.Text, IDL.Text], [Result], []),
+    'shareMsg' : IDL.Func([IDL.Text], [Result], []),
     'updateUserProfile' : IDL.Func([IDL.Text], [], []),
   });
 };

@@ -1,14 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Box, Typography, Button, TextField, List, ListItem, ListItemText, CircularProgress, AppBar, Toolbar } from '@mui/material';
+import { Container, Box, Typography, Button, TextField, List, ListItem, ListItemText, CircularProgress, AppBar, Toolbar, IconButton } from '@mui/material';
 import { AuthClient } from '@dfinity/auth-client';
 import { backend } from 'declarations/backend';
 import MessageIcon from '@mui/icons-material/Message';
+import ReplyIcon from '@mui/icons-material/Reply';
+import ThumbUpIcon from '@mui/icons-material/ThumbUp';
+import ShareIcon from '@mui/icons-material/Share';
 
 interface Msg {
   id: string;
   author: string;
   content: string;
   timestamp: bigint;
+  replies: string[];
+  likes: number;
+  shares: number;
 }
 
 interface UserProfile {
@@ -98,9 +104,27 @@ const App: React.FC = () => {
     }
   };
 
+  const handleLikeMsg = async (msgId: string) => {
+    try {
+      await backend.likeMsg(msgId);
+      fetchMsgs();
+    } catch (error) {
+      console.error('Error liking msg:', error);
+    }
+  };
+
+  const handleShareMsg = async (msgId: string) => {
+    try {
+      await backend.shareMsg(msgId);
+      fetchMsgs();
+    } catch (error) {
+      console.error('Error sharing msg:', error);
+    }
+  };
+
   return (
     <>
-      <AppBar position="static">
+      <AppBar position="static" color="primary">
         <Toolbar>
           <MessageIcon sx={{ mr: 2 }} />
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
@@ -117,7 +141,7 @@ const App: React.FC = () => {
           )}
         </Toolbar>
       </AppBar>
-      <Container maxWidth="md">
+      <Container maxWidth="sm">
         <Box sx={{ my: 4 }}>
           {isAuthenticated && (
             <>
@@ -139,7 +163,7 @@ const App: React.FC = () => {
                 <Button
                   onClick={handleCreateMsg}
                   variant="contained"
-                  color="primary"
+                  color="secondary"
                   disabled={loading}
                   sx={{ mt: 1 }}
                 >
@@ -153,11 +177,25 @@ const App: React.FC = () => {
           ) : (
             <List>
               {msgs.map((msg) => (
-                <ListItem key={msg.id} divider>
+                <ListItem key={msg.id} divider sx={{ flexDirection: 'column', alignItems: 'flex-start' }}>
                   <ListItemText
                     primary={msg.content}
                     secondary={`${msg.author} - ${new Date(Number(msg.timestamp) / 1000000).toLocaleString()}`}
                   />
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%', mt: 1 }}>
+                    <IconButton onClick={() => {}} size="small">
+                      <ReplyIcon fontSize="small" />
+                      <Typography variant="caption" sx={{ ml: 1 }}>{msg.replies.length}</Typography>
+                    </IconButton>
+                    <IconButton onClick={() => handleLikeMsg(msg.id)} size="small">
+                      <ThumbUpIcon fontSize="small" />
+                      <Typography variant="caption" sx={{ ml: 1 }}>{msg.likes}</Typography>
+                    </IconButton>
+                    <IconButton onClick={() => handleShareMsg(msg.id)} size="small">
+                      <ShareIcon fontSize="small" />
+                      <Typography variant="caption" sx={{ ml: 1 }}>{msg.shares}</Typography>
+                    </IconButton>
+                  </Box>
                 </ListItem>
               ))}
             </List>

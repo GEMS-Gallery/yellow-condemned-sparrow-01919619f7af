@@ -10,17 +10,31 @@ const theme = createTheme({
   palette: {
     mode: 'light',
     primary: {
-      main: '#4a4a4a',
+      main: '#f5f8fa',
     },
     secondary: {
-      main: '#E0E0E0',
+      main: '#1da1f2',
+    },
+    text: {
+      primary: '#14171a',
+      secondary: '#657786',
     },
     background: {
-      default: '#FFFFFF',
+      default: '#ffffff',
     },
   },
   typography: {
     fontFamily: 'Roboto, Arial, sans-serif',
+  },
+  components: {
+    MuiAppBar: {
+      styleOverrides: {
+        root: {
+          boxShadow: 'none',
+          borderBottom: '1px solid #e1e8ed',
+        },
+      },
+    },
   },
 });
 
