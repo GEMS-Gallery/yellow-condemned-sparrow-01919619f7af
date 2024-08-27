@@ -11,10 +11,19 @@ import Buffer "mo:base/Buffer";
 import Nat "mo:base/Nat";
 
 actor {
+  type Category = {
+    #All;
+    #News;
+    #Crypto;
+    #Sports;
+    #Other;
+  };
+
   type Msg = {
     id: Text;
     author: Principal;
     content: Text;
+    category: Category;
     timestamp: Time.Time;
     replies: [Text];
     likes: Nat;
@@ -47,7 +56,7 @@ actor {
     Nat.toText(nextMsgId)
   };
 
-  public shared(msg) func createMsg(content : Text) : async Result.Result<Msg, Text> {
+  public shared(msg) func createMsg(content : Text, category : Category) : async Result.Result<Msg, Text> {
     let author = msg.caller;
     if (Text.size(content) == 0 or Text.size(content) > 280) {
       return #err("Msg must be between 1 and 280 characters");
@@ -58,6 +67,7 @@ actor {
       id = id;
       author = author;
       content = content;
+      category = category;
       timestamp = Time.now();
       replies = [];
       likes = 0;
@@ -70,6 +80,16 @@ actor {
 
   public query func getTimeline() : async [Msg] {
     Iter.toArray(msgStore.vals())
+  };
+
+  public query func getMsgsByCategory(category : Category) : async [Msg] {
+    let buffer = Buffer.Buffer<Msg>(0);
+    for (msg in msgStore.vals()) {
+      if (msg.category == category or category == #All) {
+        buffer.add(msg);
+      };
+    };
+    Buffer.toArray(buffer)
   };
 
   public query func getUserProfile(userId : Principal) : async ?UserProfile {
@@ -90,6 +110,7 @@ actor {
           id = existingMsg.id;
           author = existingMsg.author;
           content = existingMsg.content;
+          category = existingMsg.category;
           timestamp = existingMsg.timestamp;
           replies = existingMsg.replies;
           likes = existingMsg.likes + 1;
@@ -109,6 +130,7 @@ actor {
           id = existingMsg.id;
           author = existingMsg.author;
           content = existingMsg.content;
+          category = existingMsg.category;
           timestamp = existingMsg.timestamp;
           replies = existingMsg.replies;
           likes = existingMsg.likes;
@@ -120,7 +142,7 @@ actor {
     }
   };
 
-  public shared(msg) func replyToMsg(msgId : Text, replyContent : Text) : async Result.Result<Msg, Text> {
+  public shared(msg) func replyToMsg(msgId : Text, replyContent : Text, category : Category) : async Result.Result<Msg, Text> {
     if (Text.size(replyContent) == 0 or Text.size(replyContent) > 280) {
       return #err("Reply must be between 1 and 280 characters");
     };
@@ -128,7 +150,7 @@ actor {
     switch (msgStore.get(msgId)) {
       case (null) { #err("Msg not found") };
       case (?existingMsg) {
-        let replyId = await createMsg(replyContent);
+        let replyId = await createMsg(replyContent, category);
         switch (replyId) {
           case (#err(e)) { #err(e) };
           case (#ok(reply)) {
@@ -137,6 +159,7 @@ actor {
               id = existingMsg.id;
               author = existingMsg.author;
               content = existingMsg.content;
+              category = existingMsg.category;
               timestamp = existingMsg.timestamp;
               replies = updatedReplies;
               likes = existingMsg.likes;

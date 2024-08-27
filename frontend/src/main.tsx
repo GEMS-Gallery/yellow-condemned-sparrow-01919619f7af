@@ -10,17 +10,18 @@ const theme = createTheme({
   palette: {
     mode: 'light',
     primary: {
-      main: '#f5f8fa',
+      main: '#000000',
     },
     secondary: {
-      main: '#1da1f2',
-    },
-    text: {
-      primary: '#14171a',
-      secondary: '#657786',
+      main: '#666666',
     },
     background: {
       default: '#ffffff',
+      paper: '#f5f5f5',
+    },
+    text: {
+      primary: '#000000',
+      secondary: '#666666',
     },
   },
   typography: {
@@ -31,7 +32,7 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           boxShadow: 'none',
-          borderBottom: '1px solid #e1e8ed',
+          borderBottom: '1px solid #e0e0e0',
         },
       },
     },
