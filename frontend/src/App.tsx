@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Box, Typography, Button, TextField, List, ListItem, ListItemText, CircularProgress } from '@mui/material';
+import { Container, Box, Typography, Button, TextField, List, ListItem, ListItemText, CircularProgress, AppBar, Toolbar } from '@mui/material';
 import { AuthClient } from '@dfinity/auth-client';
 import { backend } from 'declarations/backend';
 
@@ -30,10 +30,10 @@ const App: React.FC = () => {
       setIsAuthenticated(isAuthenticated);
       if (isAuthenticated) {
         fetchUserProfile();
-        fetchTweets();
       }
     };
     initAuth();
+    fetchTweets();
   }, []);
 
   const login = async () => {
@@ -43,7 +43,6 @@ const App: React.FC = () => {
         onSuccess: () => {
           setIsAuthenticated(true);
           fetchUserProfile();
-          fetchTweets();
         },
       });
     }
@@ -54,7 +53,6 @@ const App: React.FC = () => {
       await authClient.logout();
       setIsAuthenticated(false);
       setUserProfile(null);
-      setTweets([]);
     }
   };
 
@@ -70,11 +68,14 @@ const App: React.FC = () => {
   };
 
   const fetchTweets = async () => {
+    setLoading(true);
     try {
       const fetchedTweets = await backend.getTimeline();
       setTweets(fetchedTweets);
     } catch (error) {
       console.error('Error fetching tweets:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -97,41 +98,57 @@ const App: React.FC = () => {
   };
 
   return (
-    <Container maxWidth="md">
-      <Box sx={{ my: 4 }}>
-        <Typography variant="h4" component="h1" gutterBottom>
-          Twitter Clone
-        </Typography>
-        {isAuthenticated ? (
-          <>
-            <Button onClick={logout} variant="contained" color="secondary">
+    <>
+      <AppBar position="static">
+        <Toolbar>
+          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+            Twitter Clone
+          </Typography>
+          {isAuthenticated ? (
+            <Button color="inherit" onClick={logout}>
               Logout
             </Button>
-            {userProfile && (
-              <Typography variant="subtitle1">
-                Welcome, {userProfile.username}!
-              </Typography>
-            )}
-            <Box sx={{ my: 2 }}>
-              <TextField
-                fullWidth
-                multiline
-                rows={3}
-                variant="outlined"
-                placeholder="What's happening?"
-                value={newTweet}
-                onChange={(e) => setNewTweet(e.target.value)}
-              />
-              <Button
-                onClick={handleCreateTweet}
-                variant="contained"
-                color="primary"
-                disabled={loading}
-                sx={{ mt: 1 }}
-              >
-                {loading ? <CircularProgress size={24} /> : 'Tweet'}
-              </Button>
-            </Box>
+          ) : (
+            <Button color="inherit" onClick={login}>
+              Login
+            </Button>
+          )}
+        </Toolbar>
+      </AppBar>
+      <Container maxWidth="md">
+        <Box sx={{ my: 4 }}>
+          {isAuthenticated && (
+            <>
+              {userProfile && (
+                <Typography variant="subtitle1" sx={{ mb: 2 }}>
+                  Welcome, {userProfile.username}!
+                </Typography>
+              )}
+              <Box sx={{ mb: 4 }}>
+                <TextField
+                  fullWidth
+                  multiline
+                  rows={3}
+                  variant="outlined"
+                  placeholder="What's happening?"
+                  value={newTweet}
+                  onChange={(e) => setNewTweet(e.target.value)}
+                />
+                <Button
+                  onClick={handleCreateTweet}
+                  variant="contained"
+                  color="primary"
+                  disabled={loading}
+                  sx={{ mt: 1 }}
+                >
+                  {loading ? <CircularProgress size={24} /> : 'Tweet'}
+                </Button>
+              </Box>
+            </>
+          )}
+          {loading ? (
+            <CircularProgress />
+          ) : (
             <List>
               {tweets.map((tweet) => (
                 <ListItem key={tweet.id} divider>
@@ -142,14 +159,10 @@ const App: React.FC = () => {
                 </ListItem>
               ))}
             </List>
-          </>
-        ) : (
-          <Button onClick={login} variant="contained" color="primary">
-            Login with Internet Identity
-          </Button>
-        )}
-      </Box>
-    </Container>
+          )}
+        </Box>
+      </Container>
+    </>
   );
 };
 
