@@ -1,11 +1,5 @@
 export const idlFactory = ({ IDL }) => {
-  const Category = IDL.Variant({
-    'All' : IDL.Null,
-    'News' : IDL.Null,
-    'Crypto' : IDL.Null,
-    'Other' : IDL.Null,
-    'Sports' : IDL.Null,
-  });
+  const Category = IDL.Text;
   const Time = IDL.Int;
   const Msg = IDL.Record({
     'id' : IDL.Text,

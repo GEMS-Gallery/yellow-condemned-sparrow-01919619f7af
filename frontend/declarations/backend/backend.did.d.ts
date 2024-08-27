@@ -2,11 +2,7 @@ import type { Principal } from '@dfinity/principal';
 import type { ActorMethod } from '@dfinity/agent';
 import type { IDL } from '@dfinity/candid';
 
-export type Category = { 'All' : null } |
-  { 'News' : null } |
-  { 'Crypto' : null } |
-  { 'Other' : null } |
-  { 'Sports' : null };
+export type Category = string;
 export interface Msg {
   'id' : string,
   'content' : string,

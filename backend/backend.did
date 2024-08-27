@@ -16,14 +16,7 @@ type Msg =
    shares: nat;
    timestamp: Time;
  };
-type Category = 
- variant {
-   All;
-   Crypto;
-   News;
-   Other;
-   Sports;
- };
+type Category = text;
 service : {
   createMsg: (text, Category) -> (Result);
   getMsgsByCategory: (Category) -> (vec Msg) query;

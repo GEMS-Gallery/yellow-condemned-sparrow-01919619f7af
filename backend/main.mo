@@ -11,13 +11,7 @@ import Buffer "mo:base/Buffer";
 import Nat "mo:base/Nat";
 
 actor {
-  type Category = {
-    #All;
-    #News;
-    #Crypto;
-    #Sports;
-    #Other;
-  };
+  type Category = Text;
 
   type Msg = {
     id: Text;
@@ -85,7 +79,7 @@ actor {
   public query func getMsgsByCategory(category : Category) : async [Msg] {
     let buffer = Buffer.Buffer<Msg>(0);
     for (msg in msgStore.vals()) {
-      if (msg.category == category or category == #All) {
+      if (msg.category == category or category == "All") {
         buffer.add(msg);
       };
     };

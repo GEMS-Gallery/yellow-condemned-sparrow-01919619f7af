@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Container, Box, Typography, Button, TextField, List, ListItem, ListItemText, CircularProgress, AppBar, Toolbar, IconButton, Grid, Drawer, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
 import { AuthClient } from '@dfinity/auth-client';
 import { backend } from 'declarations/backend';
+import { Principal } from '@dfinity/principal';
 import MessageIcon from '@mui/icons-material/Message';
 import ReplyIcon from '@mui/icons-material/Reply';
 import ThumbUpIcon from '@mui/icons-material/ThumbUp';
@@ -74,9 +75,13 @@ const App: React.FC = () => {
 
   const fetchUserProfile = async () => {
     try {
-      const profile = await backend.getUserProfile();
-      if (profile) {
-        setUserProfile(profile);
+      const identity = await authClient?.getIdentity();
+      if (identity) {
+        const principal = identity.getPrincipal();
+        const profile = await backend.getUserProfile(principal);
+        if (profile) {
+          setUserProfile(profile);
+        }
       }
     } catch (error) {
       console.error('Error fetching user profile:', error);
