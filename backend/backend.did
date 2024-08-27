@@ -1,20 +1,20 @@
 type UserProfile = record {username: text;};
-type Tweet = 
+type Time = int;
+type Result = 
+ variant {
+   err: text;
+   ok: Msg;
+ };
+type Msg = 
  record {
    author: principal;
    content: text;
    id: text;
    timestamp: Time;
  };
-type Time = int;
-type Result = 
- variant {
-   err: text;
-   ok: Tweet;
- };
 service : {
-  createTweet: (text) -> (Result);
-  getTimeline: () -> (vec Tweet) query;
+  createMsg: (text) -> (Result);
+  getTimeline: () -> (vec Msg) query;
   getUserProfile: (principal) -> (opt UserProfile) query;
   updateUserProfile: (text) -> ();
 }

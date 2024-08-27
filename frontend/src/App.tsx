@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Container, Box, Typography, Button, TextField, List, ListItem, ListItemText, CircularProgress, AppBar, Toolbar } from '@mui/material';
 import { AuthClient } from '@dfinity/auth-client';
 import { backend } from 'declarations/backend';
+import MessageIcon from '@mui/icons-material/Message';
 
-interface Tweet {
+interface Msg {
   id: string;
   author: string;
   content: string;
@@ -17,8 +18,8 @@ interface UserProfile {
 const App: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [authClient, setAuthClient] = useState<AuthClient | null>(null);
-  const [tweets, setTweets] = useState<Tweet[]>([]);
-  const [newTweet, setNewTweet] = useState<string>('');
+  const [msgs, setMsgs] = useState<Msg[]>([]);
+  const [newMsg, setNewMsg] = useState<string>('');
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -33,7 +34,7 @@ const App: React.FC = () => {
       }
     };
     initAuth();
-    fetchTweets();
+    fetchMsgs();
   }, []);
 
   const login = async () => {
@@ -67,31 +68,31 @@ const App: React.FC = () => {
     }
   };
 
-  const fetchTweets = async () => {
+  const fetchMsgs = async () => {
     setLoading(true);
     try {
-      const fetchedTweets = await backend.getTimeline();
-      setTweets(fetchedTweets);
+      const fetchedMsgs = await backend.getTimeline();
+      setMsgs(fetchedMsgs);
     } catch (error) {
-      console.error('Error fetching tweets:', error);
+      console.error('Error fetching msgs:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleCreateTweet = async () => {
-    if (newTweet.trim() === '') return;
+  const handleCreateMsg = async () => {
+    if (newMsg.trim() === '') return;
     setLoading(true);
     try {
-      const result = await backend.createTweet(newTweet);
+      const result = await backend.createMsg(newMsg);
       if ('ok' in result) {
-        setNewTweet('');
-        fetchTweets();
+        setNewMsg('');
+        fetchMsgs();
       } else {
-        console.error('Error creating tweet:', result.err);
+        console.error('Error creating msg:', result.err);
       }
     } catch (error) {
-      console.error('Error creating tweet:', error);
+      console.error('Error creating msg:', error);
     } finally {
       setLoading(false);
     }
@@ -101,8 +102,9 @@ const App: React.FC = () => {
     <>
       <AppBar position="static">
         <Toolbar>
+          <MessageIcon sx={{ mr: 2 }} />
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            Twitter Clone
+            PostMsg
           </Typography>
           {isAuthenticated ? (
             <Button color="inherit" onClick={logout}>
@@ -131,17 +133,17 @@ const App: React.FC = () => {
                   rows={3}
                   variant="outlined"
                   placeholder="What's happening?"
-                  value={newTweet}
-                  onChange={(e) => setNewTweet(e.target.value)}
+                  value={newMsg}
+                  onChange={(e) => setNewMsg(e.target.value)}
                 />
                 <Button
-                  onClick={handleCreateTweet}
+                  onClick={handleCreateMsg}
                   variant="contained"
                   color="primary"
                   disabled={loading}
                   sx={{ mt: 1 }}
                 >
-                  {loading ? <CircularProgress size={24} /> : 'Tweet'}
+                  {loading ? <CircularProgress size={24} /> : 'Post Msg'}
                 </Button>
               </Box>
             </>
@@ -150,11 +152,11 @@ const App: React.FC = () => {
             <CircularProgress />
           ) : (
             <List>
-              {tweets.map((tweet) => (
-                <ListItem key={tweet.id} divider>
+              {msgs.map((msg) => (
+                <ListItem key={msg.id} divider>
                   <ListItemText
-                    primary={tweet.content}
-                    secondary={`${tweet.author} - ${new Date(Number(tweet.timestamp) / 1000000).toLocaleString()}`}
+                    primary={msg.content}
+                    secondary={`${msg.author} - ${new Date(Number(msg.timestamp) / 1000000).toLocaleString()}`}
                   />
                 </ListItem>
               ))}

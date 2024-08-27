@@ -12,7 +12,7 @@ import Buffer "mo:base/Buffer";
 
 actor {
   // Types
-  type Tweet = {
+  type Msg = {
     id: Text;
     author: Principal;
     content: Text;
@@ -24,55 +24,55 @@ actor {
   };
 
   // Stable storage
-  stable var tweets : [(Text, Tweet)] = [];
-  stable var nextTweetId : Nat = 0;
+  stable var msgs : [(Text, Msg)] = [];
+  stable var nextMsgId : Nat = 0;
   stable var userProfiles : [(Principal, UserProfile)] = [];
 
   // In-memory storage
-  var tweetStore = HashMap.HashMap<Text, Tweet>(0, Text.equal, Text.hash);
+  var msgStore = HashMap.HashMap<Text, Msg>(0, Text.equal, Text.hash);
   var userProfileStore = HashMap.HashMap<Principal, UserProfile>(0, Principal.equal, Principal.hash);
 
   // Initialize in-memory storage from stable storage
   system func preupgrade() {
-    tweets := Iter.toArray(tweetStore.entries());
+    msgs := Iter.toArray(msgStore.entries());
     userProfiles := Iter.toArray(userProfileStore.entries());
   };
 
   system func postupgrade() {
-    tweetStore := HashMap.fromIter<Text, Tweet>(tweets.vals(), 0, Text.equal, Text.hash);
+    msgStore := HashMap.fromIter<Text, Msg>(msgs.vals(), 0, Text.equal, Text.hash);
     userProfileStore := HashMap.fromIter<Principal, UserProfile>(userProfiles.vals(), 0, Principal.equal, Principal.hash);
   };
 
-  // Helper function to generate a unique tweet ID
-  func generateTweetId() : Text {
-    nextTweetId += 1;
-    return Nat.toText(nextTweetId);
+  // Helper function to generate a unique msg ID
+  func generateMsgId() : Text {
+    nextMsgId += 1;
+    return Nat.toText(nextMsgId);
   };
 
-  // Create a new tweet
-  public shared(msg) func createTweet(content : Text) : async Result.Result<Tweet, Text> {
+  // Create a new msg
+  public shared(msg) func createMsg(content : Text) : async Result.Result<Msg, Text> {
     let author = msg.caller;
     if (Text.size(content) == 0 or Text.size(content) > 280) {
-      return #err("Tweet must be between 1 and 280 characters");
+      return #err("Msg must be between 1 and 280 characters");
     };
 
-    let id = generateTweetId();
-    let tweet : Tweet = {
+    let id = generateMsgId();
+    let newMsg : Msg = {
       id = id;
       author = author;
       content = content;
       timestamp = Time.now();
     };
 
-    tweetStore.put(id, tweet);
-    #ok(tweet)
+    msgStore.put(id, newMsg);
+    #ok(newMsg)
   };
 
-  // Get the timeline (all tweets)
-  public query func getTimeline() : async [Tweet] {
-    let buffer = Buffer.Buffer<Tweet>(0);
-    for ((_, tweet) in tweetStore.entries()) {
-      buffer.add(tweet);
+  // Get the timeline (all msgs)
+  public query func getTimeline() : async [Msg] {
+    let buffer = Buffer.Buffer<Msg>(0);
+    for ((_, msg) in msgStore.entries()) {
+      buffer.add(msg);
     };
     Buffer.toArray(buffer)
   };

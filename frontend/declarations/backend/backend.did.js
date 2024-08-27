@@ -1,16 +1,16 @@
 export const idlFactory = ({ IDL }) => {
   const Time = IDL.Int;
-  const Tweet = IDL.Record({
+  const Msg = IDL.Record({
     'id' : IDL.Text,
     'content' : IDL.Text,
     'author' : IDL.Principal,
     'timestamp' : Time,
   });
-  const Result = IDL.Variant({ 'ok' : Tweet, 'err' : IDL.Text });
+  const Result = IDL.Variant({ 'ok' : Msg, 'err' : IDL.Text });
   const UserProfile = IDL.Record({ 'username' : IDL.Text });
   return IDL.Service({
-    'createTweet' : IDL.Func([IDL.Text], [Result], []),
-    'getTimeline' : IDL.Func([], [IDL.Vec(Tweet)], ['query']),
+    'createMsg' : IDL.Func([IDL.Text], [Result], []),
+    'getTimeline' : IDL.Func([], [IDL.Vec(Msg)], ['query']),
     'getUserProfile' : IDL.Func(
         [IDL.Principal],
         [IDL.Opt(UserProfile)],
